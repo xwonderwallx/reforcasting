@@ -43,16 +43,19 @@ class DataPreparator():
         
         return train_data, test_data
     
+    
     def add_time_features(self, df):
         df['day_of_week'] = df['Date'].dt.dayofweek
         df['day_of_month'] = df['Date'].dt.day
         df['month_of_year'] = df['Date'].dt.month
         return df
 
+
     def add_lagged_features(self, df, number_of_lags):
         for lag in range(1, number_of_lags + 1):
             df[f'lag_{lag}'] = df['Close'].shift(lag)
         return df
+
 
     def add_rolling_window_features(self, df, window_size):
         df[f'rolling_mean_{window_size}'] = df['Close'].rolling(window=window_size).mean()
