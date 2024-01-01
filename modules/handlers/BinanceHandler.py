@@ -9,7 +9,6 @@
 
 import ccxt
 from modules.handlers.DataHandler import DataHandler
-from datetime import datetime, timedelta
 import csv
 
 
@@ -28,6 +27,7 @@ class BinanceHandler(DataHandler):
             ]
         """
         self.params = params
+        self.exchange = ccxt.binance()
 
 
     # from abstract DataHandler.php
@@ -51,25 +51,30 @@ class BinanceHandler(DataHandler):
         # # TODO: set format of date : array({day: d, rate: r}, {}, {}, {}, {})
         symbol = self._get_currency_symbol()
         timeframe = self._get_timeframe_alias()
-        limit = self._get_limit()
-        days = self._get_days_interval()
+        # url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
+        # path_to_file = f'../binance_data/{symbol}.csv'
 
-        url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
-        path_to_file = f'../binance_data/{symbol}.csv'
+        since = self.exchange.parse8601('2010-07-17T00:00:00Z')
 
-        self._save_binance_data_csv(self._get_binance_data(
-            symbol=symbol, timeframe=timeframe, limit=limit, days=days), file_name=self._get_file_name())
+        all_data = []
+        while True:
+            data = self._get_binance_data(symbol, timeframe, since)
+            if len(data) == 0:
+                break
+            all_data.extend(data)
+            since = data[-1][0] + 1  # Update 'since' to get the next batch of data
+
+        self._save_binance_data_csv(all_data, file_name=self._get_file_name())
 
 
-    def _get_binance_data(self, symbol, timeframe='1d', limit=1000, days=365):
+    def _get_binance_data(self, symbol, timeframe='1d', since=None):
         """
         get data from binance api
         result: [timestamp, open, high, low, close, volume], where every row is key-value pair
         timeframe = ['1m' '1h' ,'1d', '1w']
         """
-        start_date = datetime.now() - timedelta(days=days)
-        start_timestamp = int(start_date.timestamp() * 1000)
-        return ccxt.binance().fetch_ohlcv(symbol, timeframe, since=start_timestamp, limit=limit)
+        limit = 500
+        return self.exchange.fetch_ohlcv(symbol, timeframe, since=since, limit=limit)
 
 
     # def get_data(self):
@@ -80,14 +85,6 @@ class BinanceHandler(DataHandler):
 
     def _get_timeframe_alias(self):
         return self.params.get('timeframe', '1d')
-
-
-    def _get_limit(self):
-        return self.params.get('limit', 1000)
-
-
-    def _get_days_interval(self):
-        return self.params.get('days', 365)
 
 
     def _get_file_name(self):
