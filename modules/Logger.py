@@ -10,3 +10,6 @@ class Logger():
 
     def add_log(self, log):
         pass
+
+    def __del__(self):
+        pass
