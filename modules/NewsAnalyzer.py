@@ -10,7 +10,7 @@ class NewsAnalyzer:
     def analyze(self):
         analyzer = SentimentIntensityAnalyzer()
 
-        for text in news:
+        for text in self.news:
             sentiment = analyzer.polarity_scores(text)
             mood_state = self.sentiment_analysis(sentiment)
 
