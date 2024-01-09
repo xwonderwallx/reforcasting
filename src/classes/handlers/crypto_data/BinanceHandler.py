@@ -2,13 +2,13 @@
 #
 #
 # Binance date handler
-# Getting and saving Binance data from Binance API to local csv file as a data storage
+# Getting and saving Binance data from Binance API to local csv file as a local data storage
 # use handle() to process the data from Binance API
 #
 #
 
 import ccxt
-from modules.handlers.DataHandler import DataHandler
+from src.classes.handlers.crypto_data.DataHandler import DataHandler
 import csv
 
 
@@ -77,8 +77,6 @@ class BinanceHandler(DataHandler):
         return self.exchange.fetch_ohlcv(symbol, timeframe, since=since, limit=limit)
 
 
-    # def get_data(self):
-    #     return ('data' in self.params) ? self.params['data']: None
     def _get_currency_symbol(self):
         return self.params.get('symbol', 'BTCUSDT')
 

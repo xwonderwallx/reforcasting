@@ -1,5 +1,5 @@
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from modules.MoodState import MoodState
+from src.classes.MoodState import MoodState
 
 
 class NewsAnalyzer:

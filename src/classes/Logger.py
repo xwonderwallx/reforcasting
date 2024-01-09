@@ -1,9 +1,11 @@
+# Logger.py
+#
+# Own logger class is made to make logs
+# Use add_log(log) to add logs in the final output
+# __del__() writes log to the .. and sends it to email
 
 
-
-
-
-class Logger():
+class Logger:
     def __init__(self, initial_text = ''):
         self.text = []
         self.text.append(initial_text)

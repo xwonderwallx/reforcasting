@@ -16,7 +16,7 @@ class WebScraper:
 
 
     def config(self):
-        config_path = './../includes/config.ini'
+        config_path = '../../includes/config.ini'
         config = configparser.ConfigParser()
         config.read(config_path)
         return config

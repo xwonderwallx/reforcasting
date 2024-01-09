@@ -7,13 +7,8 @@
 #
 import logging
 import matplotlib
-import pandas as pd
-from sklearn.model_selection import RandomizedSearchCV
 
-from modules.handlers.BinanceHandler import BinanceHandler
-from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
-
-from scipy.stats import randint as sp_randint
+from src.classes.handlers.crypto_data.BinanceHandler import BinanceHandler
 
 
 def main():
