@@ -1,0 +1,3 @@
+https://programmablesearchengine.google.com/controlpanel/overview?cx=63291c7fac9464af2
+https://programmablesearchengine.google.com/controlpanel/overview?cx=63291c7fac9464af2
+https://console.cloud.google.com/apis/credentials?project=freeapiproj
