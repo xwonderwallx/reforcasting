@@ -6,7 +6,7 @@
 
 
 class Logger:
-    def __init__(self, initial_text = ''):
+    def __init__(self, initial_text=''):
         self.text = []
         self.text.append(initial_text)
 
