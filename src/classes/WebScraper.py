@@ -5,26 +5,17 @@ import configparser
 from googleapiclient.discovery import build
 import os
 
+from src.services.Config import Config
+
 
 class WebScraper:
     def __init__(self, user_agent=''):
-        print("Current working directory: ", os.getcwd())
         if user_agent == '':
             self.user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
         else:
             self.user_agent = user_agent
-        self.search_api_key = "AIzaSyAqyM54rnijEfhWEknjRIkcg9ckRNbGZEY"
-        # self.search_api_key = self.config().get('google', 'google_search_api_key')
-        # self.search_engine_id = self.config().get('google', 'google_search_engine_id')
-        self.search_engine_id = "63291c7fac9464af2"
-
-    def config(self):
-        config_path = './../../includes/config.ini'
-        config = configparser.ConfigParser()
-        config.read(config_path)
-        print("Sections found: ", config.sections())
-
-        return config
+        self.search_api_key = Config().get_search_api_key()
+        self.search_engine_id = Config().get_search_engine_id()
 
     def get_page_content(self, url):
         headers = {'User-Agent': self.user_agent}
