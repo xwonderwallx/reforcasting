@@ -6,23 +6,32 @@ from nltk.corpus import stopwords
 from textblob import TextBlob
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from src.enums.MoodState import MoodState
+from transformers import pipeline
 
 
 class NewsAnalyzer:
     def __init__(self, news):
         self.news = news
+        self.sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
 
     def analyze(self):
-        analyzer = SentimentIntensityAnalyzer()
+        # analyzer = SentimentIntensityAnalyzer()
         results = []
 
+        # for article in self.news:
+        #     # preprocessed_text = self.preprocess_text(article)
+        #     print(article)
+        #     sentiment_vader = analyzer.polarity_scores(article)
+        #     sentiment_textblob = TextBlob(article).sentiment.polarity
+        #     mood_state = self.sentiment_analysis(sentiment_vader, sentiment_textblob)
+        #     results.append(mood_state)
+        #
+        # return results
         for article in self.news:
-            preprocessed_text = self.preprocess_text(article)
-            sentiment_vader = analyzer.polarity_scores(preprocessed_text)
-            sentiment_textblob = TextBlob(preprocessed_text).sentiment.polarity
-            mood_state = self.sentiment_analysis(sentiment_vader, sentiment_textblob)
+            sentiment_result = self.sentiment_pipeline(article)
+            sentiment_label = sentiment_result[0]['label']
+            mood_state = self.convert_label_to_mood_state(sentiment_label)
             results.append(mood_state)
-
         return results
 
     def sentiment_analysis(self, sentiment_vader, sentiment_textblob):
@@ -59,3 +68,12 @@ class NewsAnalyzer:
             concatenated_string = ' '.join(sublist)
             concatenated_news.append(concatenated_string)
         return concatenated_news
+
+    @staticmethod
+    def convert_label_to_mood_state(label):
+        if label == 'POSITIVE':
+            return MoodState.POSITIVE
+        elif label == 'NEGATIVE':
+            return MoodState.NEGATIVE
+        else:
+            return MoodState.NEUTRAL

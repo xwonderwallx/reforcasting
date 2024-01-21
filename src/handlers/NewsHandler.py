@@ -5,6 +5,8 @@
 #
 #
 #
+from collections import Counter
+
 import nltk
 
 from src.classes.NewsAnalyzer import NewsAnalyzer
@@ -20,11 +22,22 @@ class NewsHandler:
         self.date = date
 
     def handle(self):
-        news_analyzer = NewsAnalyzer(self.get_financial_news())
-        analysis = news_analyzer.analyze()
-        results_str = [str(mood_state) for mood_state in analysis]
-        results_joined = ', '.join(results_str)
-        return results_joined
+        results = []
+
+        for news in self.get_financial_news():
+            news_analyzer = NewsAnalyzer(news)
+            analysis = news_analyzer.analyze()
+            results.append(analysis)
+
+        overall_sentiment = self.aggregate_sentiment(results)
+        return overall_sentiment
 
     def get_financial_news(self):
         return WebScraper().search_and_scrape(f'{self.currency} {self.date}')
+
+    def aggregate_sentiment(self, sentiment_list):
+        # Count the number of each sentiment
+        sentiment_count = Counter([sentiment for sublist in sentiment_list for sentiment in sublist])
+        # Determine the sentiment with the highest count
+        overall_sentiment = sentiment_count.most_common(1)[0][0]
+        return overall_sentiment
