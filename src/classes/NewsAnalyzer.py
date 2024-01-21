@@ -28,6 +28,9 @@ class NewsAnalyzer:
         #
         # return results
         for article in self.news:
+            print(article)
+            print()
+            print()
             sentiment_result = self.sentiment_pipeline(article)
             sentiment_label = sentiment_result[0]['label']
             mood_state = self.convert_label_to_mood_state(sentiment_label)
