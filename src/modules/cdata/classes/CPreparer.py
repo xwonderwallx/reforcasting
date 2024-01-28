@@ -5,22 +5,21 @@
 #
 #
 #
-
-
-import string
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-from src.handlers.DataHandler import DataHandler
+from src.base.enums.MoodState import MoodState
+from src.base.services.Settings import Settings
+from src.modules.cdata.classes.CNormalizer import CNormalizer
 
 
 class CPreparer:
-    def __init__(self, params: dict = None):
-        if 'file_path' not in params or params is None:
-            Exception()
+    def __init__(self):
+        self.__settings = Settings.get()
 
-        self.__params = params
         # self.params['exchange_data_from_csv']  TODO already read table here, already downloaded
+        # self.params['sequence_length']
+        # self.params['feature_columns']
 
     # def prepare_data(self):
     #     # TODO may be changed to DB
@@ -35,11 +34,14 @@ class CPreparer:
     #     return dataset
 
     def prepare_data(self):
-        df = self.__params['exchange_data_from_csv']
+        # TODO make path to file not as CONSTANT
+        df = self.__settings['handler_cdata']['save_csv_path']
         df = self.__convert_data_columns_into_date_format(df)
         df = self.__add_technical_indicators(df)
+        df = self.__normalize_data(df)
+        sets = self.__prepare_dataset(df)
 
-        return df
+        return sets
 
     # def __get_crypto_exchange_data(self, backup_filename: str = None):
     #     filename = backup_filename if backup_filename else self.params['backup_name']
@@ -78,15 +80,16 @@ class CPreparer:
         return 100 - (100 / (1 + RS))
 
     def __add_technical_indicators(self, df):
-        df['RSI'] = self.__calculate_rsi(df, 14)
-        ema_12 = df['Close'].ewm(span=12, adjust=False).mean()
-        ema_26 = df['Close'].ewm(span=26, adjust=False).mean()
-        df['MACD'] = ema_12 - ema_26
-        df['Signal_Line'] = df['MACD'].ewm(span=9, adjust=False).mean()
+        # df['RSI'] = self.__calculate_rsi(df, 14)
+
+        df['MACD'] = self.__calculate_ewm(df['Close'], 12) - self.__calculate_ewm(df['Close'], 26)
+        df['Signal_Line'] = self.__calculate_ewm(df['MACD'], 9)
         df['MACD_Histogram'] = df['MACD'] - df['Signal_Line']
         df = self.__add_bollinger_bands(df)
+        df['MFI'] = self.__calculate_money_flow_index(df)
+        df['RVI'] = self.__calculate_relative_volatility_index(df)
 
-        return df
+        return self.__drop_not_available_values(df)
 
     #
     # def __add_technical_indicators(self, df):
@@ -135,12 +138,16 @@ class CPreparer:
     #     }
 
     def __add_bollinger_bands(self, df):
-        sma_period = 20
-        std_dev_multiplier = 2
+        sma_period = self.__settings['ml_model']['cdata']['technical_indicators']['sma_period']
+        std_dev_multiplier = self.__settings['ml_model']['cdata']['technical_indicators'][
+            'standard_deviation_multiplier']
+
         df['SMA'] = df['Close'].rolling(window=sma_period).mean()
         df['Upper_BB'] = df['SMA'] + df['Close'].rolling(window=sma_period).std() * std_dev_multiplier
         df['Lower_BB'] = df['SMA'] - df['Close'].rolling(window=sma_period).std() * std_dev_multiplier
+
         return df
+
     #
     # def __add_bollinger_bands(self, df):
     #     # set params for Bollinger Bands (BB)
@@ -181,3 +188,73 @@ class CPreparer:
     #
     #     # remove starting NA values after calculate indicators
     #     df.dropna(inplace=True)
+
+    def __calculate_ewm(self, df, period):
+        return df.ewm(span=period, adjust=False).mean()
+
+    def __calculate_money_flow_index(self, df):
+        money_flow_ratio = self.__calculate_money_flow_ratio(df)
+        return 100 - (100 / 1 + money_flow_ratio)
+
+    def __calculate_money_flow_ratio(self, df):
+        typical_price = (df['Close'] + df['Low'] + df['High']) / 3
+        raw_money_flow = typical_price * df['Volume']
+        positive_flow = raw_money_flow.where(typical_price > typical_price.shift(1), 0)
+        negative_flow = raw_money_flow.where(typical_price < typical_price.shift(1), 0)
+        positive_flow_sum = positive_flow.rolling(window=14).sum()
+        negative_flow_sum = negative_flow.rolling(window=14).sum()
+        return positive_flow_sum / negative_flow_sum
+
+    def __calculate_relative_volatility_index(self, df):
+        rvi_period = self.__settings['ml_model']['cdata']['technical_indicators']['relative_volatility_index_period']
+        standard_deviation = df['Close'].rolling(window=rvi_period).std()
+        mean_deviation = standard_deviation.rolling(window=rvi_period).mean()
+        return standard_deviation / mean_deviation.where(mean_deviation != 0, np.nan)
+
+    def __drop_not_available_values(self, df):
+        return df.dropna(inplace=True)
+
+    def __normalize_data(self, df):
+        return CNormalizer(df).normalize()  #
+        # TODO change to dynamic features then to tune hyper params
+
+
+
+
+    ################ TODO NOT SET YET | NEED TO FIX FATAL ERRORS
+    def __prepare_dataset(self, df):
+        look_back = self.__settings['ml_model']['cdata']['datasets_params']['look_back']
+        x, y = self.__create_dataset(self.__normalize_data(df).values, look_back)
+        return self.__get_train_and_test_sets(df, {'x': x, 'y': y})
+
+
+    def __get_train_and_test_sets(self, df, datasets, params=None):
+        # df.dropna(inplace=True)
+        # scaler_features = MinMaxScaler(feature_range=(0, 1))
+        # df_scaled = scaler_features.fit_transform(df[params['features_columns']])
+        # df_scaled = pd.DataFrame(df_scaled, columns=params['features_columns'])
+        x = datasets['x']
+        y = datasets['y']
+        normalized_data = self.__normalize_data(df)
+        set_size = self.__settings['ml_model']['cdata']['datasets_params']['train_set']['size']
+        training_data_len = int(np.ceil(len(normalized_data) * set_size))
+        # x_train, y_train = self.__create_dataset(normalized_data[:training_data_len])
+        # x_test, y_test = self.__create_dataset(normalized_data[training_data_len:])
+        (x_train, x_test,
+         y_train, y_test) = (
+            x[:training_data_len], x[training_data_len:],
+            y[:training_data_len], y[training_data_len:])
+
+        return {
+            'x_train': x_train,
+            'y_train': y_train,
+            'x_test': x_test,
+            'y_test': y_test
+        }
+
+    def __create_dataset(self, df, sequence_length=60):
+        x, y = [], []
+        for i in range(sequence_length, len(df)):
+            x.append(df[i - sequence_length:i].to_numpy())
+            y.append(df.iloc[i]['Close'])
+        return np.array(x), np.array(y)
