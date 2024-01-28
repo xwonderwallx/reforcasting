@@ -1,11 +1,9 @@
 import logging
 from bs4 import BeautifulSoup
 import requests
-import configparser
 from googleapiclient.discovery import build
-import os
 
-from src.services.Config import Config
+from src.base.services import Config
 
 
 class WebScraper:

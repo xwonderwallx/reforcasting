@@ -3,9 +3,7 @@ import nltk
 from bs4 import BeautifulSoup
 from nltk import PorterStemmer, WordNetLemmatizer
 from nltk.corpus import stopwords
-from textblob import TextBlob
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from src.enums.MoodState import MoodState
+from src.base.enums import MoodState
 from transformers import pipeline
 
 

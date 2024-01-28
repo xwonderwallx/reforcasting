@@ -5,15 +5,16 @@
 #
 #
 #
-from collections import Counter
 
 import nltk
 
-from src.classes.NewsAnalyzer import NewsAnalyzer
-from src.classes.WebScraper import WebScraper
+from src.modules.news.classes.NewsAnalyzer import NewsAnalyzer
+from src.modules.news.classes.WebScraper import WebScraper
+from src.base.handlers.IHandler import IHandler
+from collections import Counter
 
 
-class NewsHandler:
+class NewsHandler(IHandler):
     def __init__(self, currency, date):
         nltk.download('wordnet')
         nltk.download('stopwords')

@@ -5,13 +5,12 @@
 # __del__() writes log to the list and sends it to email
 #
 #
-import inspect
 import pprint
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from src.services.Singleton import Singleton
-from src.helpers.LogHelper import LogHelper
+from src.base.entities.Singleton import Singleton
+from src.base.helpers.LogHelper import LogHelper
 
 
 class Logger(Singleton):

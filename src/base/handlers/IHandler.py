@@ -9,7 +9,9 @@
 from abc import ABC, abstractmethod
 
 
-class DataHandler(ABC):
+# TODO change name to DataCollector
+
+class IHandler(ABC):
 
     @abstractmethod
     def handle(self):

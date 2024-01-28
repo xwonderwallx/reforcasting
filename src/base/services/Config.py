@@ -5,7 +5,7 @@
 #
 
 import configparser
-from src.services.Logger import Logger
+from src.base.services.Logger import Logger
 
 
 class Config:

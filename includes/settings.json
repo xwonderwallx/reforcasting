@@ -1,0 +1,52 @@
+{
+  "exchange_data": "",
+  "handler_cdata": {
+    "symbol": "BTCUSDT",
+    "timeframe": "1d",
+    "save_csv_path": "btc_data.csv"
+  },
+  "ml_model": {
+    "cdata": {
+      "best_model_save_path": "some_path_will_be_here",
+      "hyper_parameters": {
+        "features": [
+          "Close",
+          "Volume",
+          "RSI",
+          "MACD",
+          "Signal_Line",
+          "MACD_Histogram",
+          "Upper_BB",
+          "Lower_BB"
+        ],
+        "epochs": 150,
+        "batch_size": 16
+      },
+      "datasets_params": {
+        "features": [
+          "Close",
+          "Volume",
+          "RSI",
+          "MACD",
+          "Signal_Line",
+          "MACD_Histogram",
+          "Upper_BB",
+          "Lower_BB"
+        ],
+        "test_set": {
+          "size": 0.2
+        },
+        "train_set": {
+          "size": 0.8
+        },
+        "sequence_default_length": 60,
+        "look_back": 60
+      },
+      "technical_indicators": {
+        "sma_period": 20,
+        "standard_deviation_multiplier": 2,
+        "relative_volatility_index_period": 10
+      }
+    }
+  }
+}

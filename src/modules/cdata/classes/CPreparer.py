@@ -7,8 +7,6 @@
 #
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
-from src.base.enums.MoodState import MoodState
 from src.base.services.Settings import Settings
 from src.modules.cdata.classes.CNormalizer import CNormalizer
 

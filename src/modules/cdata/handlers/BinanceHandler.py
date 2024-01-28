@@ -8,11 +8,11 @@
 #
 
 import ccxt
-from src.handlers.DataHandler import DataHandler
+from src.base.handlers.IHandler import IHandler
 import csv
 
 
-class BinanceHandler(DataHandler):
+class BinanceHandler(IHandler):
 
     def __init__(self, params=None):
         """
@@ -31,9 +31,9 @@ class BinanceHandler(DataHandler):
 
     # from abstract DataHandler.php
     def handle(self):
-        self._get_and_save_binance_data()
+        self.__get_and_save_binance_data()
 
-    def _save_binance_data_csv(self, data, file_name):
+    def __save_binance_data_csv(self, data, file_name):
         with open(file_name, 'w', newline='') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow(['Timestamp', 'Open', 'High',
@@ -43,11 +43,11 @@ class BinanceHandler(DataHandler):
                 writer.writerow(
                     [timestamp, open_price, high, low, close, volume])
 
-    def _get_and_save_binance_data(self):
+    def __get_and_save_binance_data(self):
         # # TODO: markets for rate
         # # TODO: set format of date : array({day: d, rate: r}, {}, {}, {}, {})
-        symbol = self._get_currency_symbol()
-        timeframe = self._get_timeframe_alias()
+        symbol = self.__get_currency_symbol()
+        timeframe = self.__get_timeframe_alias()
         # url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
         # path_to_file = f'../binance_data/{symbol}.csv'
 
@@ -55,15 +55,15 @@ class BinanceHandler(DataHandler):
 
         all_data = []
         while True:
-            data = self._get_binance_data(symbol, timeframe, since)
+            data = self.__get_binance_data(symbol, timeframe, since)
             if len(data) == 0:
                 break
             all_data.extend(data)
             since = data[-1][0] + 1  # Update 'since' to get the next batch of data
 
-        self._save_binance_data_csv(all_data, file_name=self._get_file_name())
+        self.__save_binance_data_csv(all_data, file_name=self.__get_file_name())
 
-    def _get_binance_data(self, symbol, timeframe='1d', since=None):
+    def __get_binance_data(self, symbol, timeframe='1d', since=None):
         """
         get data from binance api
         result: [timestamp, open, high, low, close, volume], where every row is key-value pair
@@ -72,11 +72,11 @@ class BinanceHandler(DataHandler):
         limit = 500
         return self.exchange.fetch_ohlcv(symbol, timeframe, since=since, limit=limit)
 
-    def _get_currency_symbol(self):
+    def __get_currency_symbol(self):
         return self.params.get('symbol', 'BTCUSDT')
 
-    def _get_timeframe_alias(self):
+    def __get_timeframe_alias(self):
         return self.params.get('timeframe', '1d')
 
-    def _get_file_name(self):
-        return self.params.get('file_name', 'base.csv')
+    def __get_file_name(self):
+        return self.params.get('file_name', 'btc_data_test.csv')
