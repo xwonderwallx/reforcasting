@@ -8,7 +8,7 @@
 import logging
 import matplotlib
 
-from src.modules.cdata.handlers.BinanceHandler import BinanceHandler
+from src.modules.dc.cdata import BinanceHandler
 
 
 def main():

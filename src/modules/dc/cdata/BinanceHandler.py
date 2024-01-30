@@ -26,8 +26,8 @@ class BinanceHandler(IHandler):
                 'days' => 365
             ]
         """
-        self.params = params
-        self.exchange = ccxt.binance()
+        self.__params = params
+        self.__exchange = ccxt.binance()
 
     # from abstract DataHandler.php
     def handle(self):
@@ -51,7 +51,7 @@ class BinanceHandler(IHandler):
         # url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
         # path_to_file = f'../binance_data/{symbol}.csv'
 
-        since = self.exchange.parse8601('2010-07-17T00:00:00Z')
+        since = self.__exchange.parse8601('2010-07-17T00:00:00Z')
 
         all_data = []
         while True:
@@ -70,13 +70,13 @@ class BinanceHandler(IHandler):
         timeframe = ['1m' '1h' ,'1d', '1w']
         """
         limit = 500
-        return self.exchange.fetch_ohlcv(symbol, timeframe, since=since, limit=limit)
+        return self.__exchange.fetch_ohlcv(symbol, timeframe, since=since, limit=limit)
 
     def __get_currency_symbol(self):
-        return self.params.get('symbol', 'BTCUSDT')
+        return self.__params.get('symbol', 'BTCUSDT')
 
     def __get_timeframe_alias(self):
-        return self.params.get('timeframe', '1d')
+        return self.__params.get('timeframe', '1d')
 
     def __get_file_name(self):
-        return self.params.get('file_name', 'btc_data_test.csv')
+        return self.__params.get('file_name', 'btc_data_test.csv')

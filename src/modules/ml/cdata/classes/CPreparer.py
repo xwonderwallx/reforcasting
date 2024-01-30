@@ -8,13 +8,13 @@
 import numpy as np
 import pandas as pd
 from src.base.services.Settings import Settings
-from src.modules.cdata.classes.CNormalizer import CNormalizer
+from src.modules.ml.cdata.classes.CNormalizer import CNormalizer
 
 
 class CPreparer:
-    def __init__(self):
+    def __init__(self, df):
         self.__settings = Settings.get()
-
+        self.__df = df
         # self.params['exchange_data_from_csv']  TODO already read table here, already downloaded
         # self.params['sequence_length']
         # self.params['feature_columns']
@@ -32,14 +32,20 @@ class CPreparer:
     #     return dataset
 
     def prepare_data(self):
-        # TODO make path to file not as CONSTANT
-        df = self.__settings['handler_cdata']['save_csv_path']
+        df = self.__df
         df = self.__convert_data_columns_into_date_format(df)
         df = self.__add_technical_indicators(df)
+        print(df.columns)
         df = self.__normalize_data(df)
-        sets = self.__prepare_dataset(df)
+        print("After __normalize_data:", df)  # This should not be None either
 
-        return sets
+        sets = self.__prepare_dataset(df)
+        print("After __prepare_dataset:", sets)  # Check if None
+
+        return {
+            'sets': sets,
+            'df': df
+        }
 
     # def __get_crypto_exchange_data(self, backup_filename: str = None):
     #     filename = backup_filename if backup_filename else self.params['backup_name']
@@ -78,7 +84,7 @@ class CPreparer:
         return 100 - (100 / (1 + RS))
 
     def __add_technical_indicators(self, df):
-        # df['RSI'] = self.__calculate_rsi(df, 14)
+        df['RSI'] = self.__calculate_rsi(df, 14)
 
         df['MACD'] = self.__calculate_ewm(df['Close'], 12) - self.__calculate_ewm(df['Close'], 26)
         df['Signal_Line'] = self.__calculate_ewm(df['MACD'], 9)
@@ -87,7 +93,8 @@ class CPreparer:
         df['MFI'] = self.__calculate_money_flow_index(df)
         df['RVI'] = self.__calculate_relative_volatility_index(df)
 
-        return self.__drop_not_available_values(df)
+        self.__drop_not_available_values(df)
+        return df
 
     #
     # def __add_technical_indicators(self, df):
@@ -210,21 +217,17 @@ class CPreparer:
         return standard_deviation / mean_deviation.where(mean_deviation != 0, np.nan)
 
     def __drop_not_available_values(self, df):
-        return df.dropna(inplace=True)
+        df.dropna(inplace=True)
 
     def __normalize_data(self, df):
+        print(df.columns)
         return CNormalizer(df).normalize()  #
         # TODO change to dynamic features then to tune hyper params
 
-
-
-
-    ################ TODO NOT SET YET | NEED TO FIX FATAL ERRORS
     def __prepare_dataset(self, df):
         look_back = self.__settings['ml_model']['cdata']['datasets_params']['look_back']
         x, y = self.__create_dataset(self.__normalize_data(df).values, look_back)
         return self.__get_train_and_test_sets(df, {'x': x, 'y': y})
-
 
     def __get_train_and_test_sets(self, df, datasets, params=None):
         # df.dropna(inplace=True)
@@ -253,6 +256,6 @@ class CPreparer:
     def __create_dataset(self, df, sequence_length=60):
         x, y = [], []
         for i in range(sequence_length, len(df)):
-            x.append(df[i - sequence_length:i].to_numpy())
-            y.append(df.iloc[i]['Close'])
+            x.append(df[i - sequence_length:i])
+            y.append(df[i, 0])
         return np.array(x), np.array(y)

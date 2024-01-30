@@ -9,8 +9,12 @@ from transformers import pipeline
 
 class NewsAnalyzer:
     def __init__(self, news):
-        self.news = news
-        self.sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
+        self.__news = news
+
+        task = 'sentiment-analysis'
+        model = 'distilbert-base-uncased-finetuned-sst-2-english'
+
+        self.__sentiment_pipeline = pipeline(task=task, model=model)
 
     def analyze(self):
         # analyzer = SentimentIntensityAnalyzer()
@@ -25,17 +29,17 @@ class NewsAnalyzer:
         #     results.append(mood_state)
         #
         # return results
-        for article in self.news:
+        for article in self.__news:
             print(article)
             print()
             print()
-            sentiment_result = self.sentiment_pipeline(article)
+            sentiment_result = self.__sentiment_pipeline(article)
             sentiment_label = sentiment_result[0]['label']
             mood_state = self.convert_label_to_mood_state(sentiment_label)
             results.append(mood_state)
         return results
 
-    def sentiment_analysis(self, sentiment_vader, sentiment_textblob):
+    def __sentiment_analysis(self, sentiment_vader, sentiment_textblob):
         if sentiment_vader['compound'] >= 0.05 and sentiment_textblob > 0:
             return MoodState.POSITIVE
         elif sentiment_vader['compound'] <= -0.05 and sentiment_textblob < 0:
@@ -43,7 +47,7 @@ class NewsAnalyzer:
         else:
             return MoodState.NEUTRAL
 
-    def preprocess_text(self, text):
+    def __preprocess_text(self, text):
         soup = BeautifulSoup(text, "html.parser")
         text = soup.get_text(separator=" ")
 
@@ -63,7 +67,7 @@ class NewsAnalyzer:
 
         return ' '.join(tokens)
 
-    def concat_article(self, article_list):
+    def __concat_article(self, article_list):
         concatenated_news = []
         for sublist in article_list:
             concatenated_string = ' '.join(sublist)

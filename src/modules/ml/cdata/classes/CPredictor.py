@@ -5,10 +5,9 @@
 #
 #
 #
-import pandas as pd
 
 from src.base.services.Settings import Settings
-from src.modules.cdata.classes.CNormalizer import CNormalizer
+from src.modules.ml.cdata.classes.CNormalizer import CNormalizer
 
 
 class CPredictor:
@@ -17,15 +16,16 @@ class CPredictor:
         self.__settings = Settings.get()
         self.__sets = sets
         self.__df = df
+        self.__normalizer = CNormalizer(df)
 
     def predict(self):
         x_test = self.__sets['x_test']
         y_test = self.__sets['y_test']
 
+        self.__normalizer.normalize()
+        scaler = self.__normalizer.get_scaler()
+
         predicted = self.__trained_model.predict(x_test)
-        scaler = CNormalizer.scale()
-        # Inverse transform the predicted and real values
-        # Make sure scaler was fitted to the 'Close' prices initially
         predicted_prices = scaler.inverse_transform(predicted)
         real_values = scaler.inverse_transform(y_test.reshape(-1, 1))
 

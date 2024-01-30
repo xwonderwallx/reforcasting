@@ -1,0 +1,6 @@
+
+
+dc - data collection
+cdata - crypto data
+ml - machine learning
+pdirection - price direction

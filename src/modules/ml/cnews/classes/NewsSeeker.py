@@ -5,7 +5,7 @@
 #
 #
 #
-from src.modules.news.handlers.NewsHandler import NewsHandler
+from src.modules.dc.cnews.handlers.NewsHandler import NewsHandler
 
 
 class NewsSeeker:

@@ -19,7 +19,7 @@ class CEvaluator:
     def get_info(self):
         metrics = self.__calculate_evaluation_metrics()
 
-        # TODO save to db here
+        # TODO save to logs DB here
         print(f"Evaluation metrics:\n")
         print(f"mse:\t{metrics['mse']}\n")
         print(f"mae:\t{metrics['mae']}\n")

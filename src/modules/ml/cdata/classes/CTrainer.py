@@ -6,18 +6,14 @@
 #
 #
 
-import numpy as np
-import pandas as pd
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import GRU, Dropout, Dense
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.src.callbacks import ReduceLROnPlateau
 from keras.src.layers import Bidirectional
-from sklearn.preprocessing import MinMaxScaler
 
 from src.base.services.Settings import Settings
-from src.modules.cdata.classes.CPreparer import CPreparer
 
 
 class CTrainer:
@@ -32,13 +28,15 @@ class CTrainer:
         # }
         model = self.__define_model()
         compiled_model = self.__compile_model(model)
-        return self.__fit_model(model)
-
+        history = self.__fit_model(compiled_model)
+        return {
+            'history': history,
+            'model': model
+        }
 
     # def __get_training_and_testing_sets(self):
     #     training_data_len = int(len(df_scaled) * 0.8)
     #     return X[:training_data_len], X[training_data_len:], Y[:training_data_len], Y[training_data_len:]
-
 
     def __define_model(self):
         features_columns = self.__settings['ml_model']['cdata']['datasets_params']['features']
@@ -72,7 +70,7 @@ class CTrainer:
     def __fit_model(self, model):
         epochs = self.__settings['ml_model']['cdata']['hyper_parameters']['epochs']
         batch_size = self.__settings['ml_model']['cdata']['hyper_parameters']['batch_size']
-
+        print(self.__sets.keys())
         x_train = self.__sets['x_train']
         y_train = self.__sets['y_train']
         x_test = self.__sets['x_test']

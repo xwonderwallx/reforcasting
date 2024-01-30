@@ -13,10 +13,10 @@ class Config:
 
     def __init__(self):
         section = 'google'
-        self.search_api_key = self.config().get(section, 'google_search_api_key')
-        self.search_engine_id = self.config().get(section, 'google_search_engine_id')
+        self.__search_api_key = self.__config().get(section, 'google_search_api_key')
+        self.__search_engine_id = self.__config().get(section, 'google_search_engine_id')
 
-    def config(self):
+    def __config(self):
         config_path = Config.CONFIG_PATH
         config = configparser.ConfigParser()
         config.read(config_path)
@@ -27,7 +27,7 @@ class Config:
         return config
 
     def get_search_engine_id(self):
-        return self.search_engine_id
+        return self.__search_engine_id
 
     def get_search_api_key(self):
-        return self.search_api_key
+        return self.__search_api_key
