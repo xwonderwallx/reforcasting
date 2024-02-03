@@ -1,5 +1,39 @@
 {
-  "exchange_data": "",
+  "configuration": {
+    "paths":  {
+      "exchange_data": "./includes/exchange_data/",
+      "models": "./includes/models/"
+    },
+    "google": {
+      "keys": {
+        "google_search_api_key": "AIzaSyAqyM54rnijEfhWEknjRIkcg9ckRNbGZEY",
+        "google_search_engine_id": "63291c7fac9464af2"
+      }
+    },
+    "exchange_data": {
+      "trading_pairs": {
+        "binance": [
+          "BTCUSDT",
+          "ETHUSDT",
+          "BNBUSDT",
+          "XRPUSDT",
+          "ADAUSDT",
+          "SOLUSDT",
+          "DOGEUSDT",
+          "DOTUSDT",
+          "LTCUSDT",
+          "BCHUSDT",
+          "LINKUSDT",
+          "XLMUSDT",
+          "UNIUSDT",
+          "EOSUSDT",
+          "TRXUSDT",
+          "XTZUSDT",
+          "AAVEUSDT"
+        ]
+      }
+    }
+  },
   "handler_cdata": {
     "symbol": "BTCUSDT",
     "timeframe": "1d",
@@ -124,7 +158,6 @@
         }
       },
       "datasets_params": {
-
       }
     }
   }

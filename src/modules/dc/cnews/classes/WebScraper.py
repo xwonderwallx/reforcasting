@@ -2,8 +2,7 @@ import logging
 from bs4 import BeautifulSoup
 import requests
 from googleapiclient.discovery import build
-
-from src.base.services import Config
+from src.base.services.Config import Config
 
 
 class WebScraper:
@@ -12,8 +11,9 @@ class WebScraper:
             self.__user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
         else:
             self.__user_agent = user_agent
-        self.__search_api_key = Config().get_search_api_key()
-        self.__search_engine_id = Config().get_search_engine_id()
+        self.__config = Config.get()['configuration']['google']['keys']
+        self.__search_api_key = self.__config['google_search_api_key']
+        self.__search_engine_id = self.__config['google_search_engine_id']
 
     def search_and_scrape(self, query):
         search_links_results = self.__google_search(query)

@@ -11,42 +11,37 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from src.base.entities.Singleton import Singleton
 from src.base.helpers.LogHelper import LogHelper
+from src.base.services.Config import Config
 
 
 class Logger(Singleton):
 
-    def __init__(self, sender_email='', recipient_email='', smtp_server='', password='', initial_text='', debug_label='', log_label=''):
-        if not hasattr(self, 'initialized'):
-            self.initialized = True
-            self.text = []
-            if initial_text == '':
-                self.text.append(initial_text)
+    @property
+    def logger(self):
+        return self.__logs
 
-            self.sender_email = sender_email if sender_email != '' else LogHelper.SENDER_EMAIL
-            self.recipient_email = recipient_email if recipient_email != '' else LogHelper.RECIPIENT_EMAIL
-            self.smtp_server = smtp_server if smtp_server != '' else LogHelper.SMTP_SERVER
-            self.password = password if password != '' else LogHelper.PASSWORD
+    def __init__(self):
+        # if not hasattr(self, 'initialized'):
+        #     self.initialized = True
+        #     self.text = []
+        #     if initial_text == '':
+        #         self.text.append(initial_text)
+        #
+        #     self.sender_email = sender_email if sender_email != '' else LogHelper.SENDER_EMAIL
+        #     self.recipient_email = recipient_email if recipient_email != '' else LogHelper.RECIPIENT_EMAIL
+        #     self.smtp_server = smtp_server if smtp_server != '' else LogHelper.SMTP_SERVER
+        #     self.password = password if password != '' else LogHelper.PASSWORD
+        #
+        #     self.debug_label = debug_label if debug_label != '' else LogHelper.DEBUG_LABEL
+        #     self.subject = LogHelper.LOG_LABEL if log_label != '' else LogHelper.LOG_LABEL
 
-            self.debug_label = debug_label if debug_label != '' else LogHelper.DEBUG_LABEL
-            self.subject = LogHelper.LOG_LABEL if log_label != '' else LogHelper.LOG_LABEL
+        self.__settings = Config.get()['logger']
+        self.__client_url = self.__settings['client_url']
+        self.__log_label = self.__settings['log_label']
+        self.__logs = []
 
     def add_log(self, log):
-        self.text.append(f"{self.debug_label} | {log}")
+        self.__logs.append(f"{self.__log_label} | {log}")
 
-    def send_logs_email(self):
-        array_str = pprint.pformat(self.text)
-
-        msg = MIMEMultipart()
-        msg['From'] = self.sender_email
-        msg['To'] = self.recipient_email
-        msg['Subject'] = self.subject
-        msg.attach(MIMEText(array_str, 'plain'))
-
-        server = smtplib.SMTP(self.smtp_server, 587)
-        server.starttls()
-        server.login(self.sender_email, self.password)
-        server.send_message(msg)
-        server.quit()
-
-    def __del__(self):
-        self.send_logs_email()
+    def send_logs_to_client(self):
+        pass

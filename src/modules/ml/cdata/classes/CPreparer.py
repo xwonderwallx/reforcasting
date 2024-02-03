@@ -7,13 +7,13 @@
 #
 import numpy as np
 import pandas as pd
-from src.base.services.Settings import Settings
+from src.base.services.Config import Config
 from src.modules.ml.cdata.classes.CNormalizer import CNormalizer
 
 
 class CPreparer:
     def __init__(self, df):
-        self.__settings = Settings.get()
+        self.__settings = Config.get()
         self.__df = df
         # self.params['exchange_data_from_csv']  TODO already read table here, already downloaded
         # self.params['sequence_length']

@@ -14,13 +14,15 @@ class Timer:
         self.__stop_time = None
         self.__label = label
 
-    def start(self):
+    def start(self, label=''):
         self.__start_time = time.time()
+        if label is not '':
+            self.__label = label
 
     def stop(self):
         self.__stop_time = time.time()
 
-    def get_info(self):
+    def info(self):
         if self.__start_time is None or self.__stop_time is None:
             return f"{self.__label} | Timer is not set or stopped yet."
         else:

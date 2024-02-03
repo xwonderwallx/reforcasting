@@ -13,12 +13,12 @@ from keras.optimizers import Adam
 from keras.src.callbacks import ReduceLROnPlateau
 from keras.src.layers import Bidirectional
 
-from src.base.services.Settings import Settings
+from src.base.services.Config import Config
 
 
 class CTrainer:
     def __init__(self, sets):
-        self.__settings = Settings.get()
+        self.__settings = Config.get()
         self.__sets = sets
 
     def train(self):

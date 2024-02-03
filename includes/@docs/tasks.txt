@@ -1,0 +1,21 @@
+1.
+
+
+    # TODO On each step here execute .handle() method
+    def __create_unique_symbols_pairs(self):
+        symbols_pairs = []
+        for pair in self.cdata_unique_symbols_pairs:
+            __symbols_pair = {
+                'symbol': pair,
+                'timeframe': '1d',
+                'file_name': f'{pair}.csv'
+                # TODO set time interval here in the near future
+            }
+            symbols_pairs.append(__symbols_pair)
+        return symbols_pairs
+
+class MarketDataHelper.py
+
+
+2. # TODO I have changed the Config class, now it addresses to config.json
+   # TODO Make test and make sure, that all classes have been updated after refactoring

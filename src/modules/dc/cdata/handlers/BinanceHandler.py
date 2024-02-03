@@ -9,10 +9,14 @@
 
 import ccxt
 from src.base.handlers.IHandler import IHandler
-import csv
+from src.base.helpers.CsvHelper import CsvHelper
 
 
 class BinanceHandler(IHandler):
+
+    @property
+    def exchange(self):
+        return self.__exchange
 
     def __init__(self, params=None):
         """
@@ -31,27 +35,21 @@ class BinanceHandler(IHandler):
 
     # from abstract DataHandler.php
     def handle(self):
-        self.__get_and_save_binance_data()
-
-    def __save_binance_data_csv(self, data, file_name):
-        with open(file_name, 'w', newline='') as csv_file:
-            writer = csv.writer(csv_file)
-            writer.writerow(['Timestamp', 'Open', 'High',
-                             'Low', 'Close', 'Volume'])
-            for candle in data:
-                timestamp, open_price, high, low, close, volume = candle
-                writer.writerow(
-                    [timestamp, open_price, high, low, close, volume])
+        return self.__get_and_save_binance_data()
 
     def __get_and_save_binance_data(self):
         # # TODO: markets for rate
         # # TODO: set format of date : array({day: d, rate: r}, {}, {}, {}, {})
         symbol = self.__get_currency_symbol()
+        print(symbol)
         timeframe = self.__get_timeframe_alias()
         # url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
         # path_to_file = f'../binance_data/{symbol}.csv'
+        print(timeframe)
+        filename = self.__get_file_name()
 
         since = self.__exchange.parse8601('2010-07-17T00:00:00Z')
+        print(since)
 
         all_data = []
         while True:
@@ -60,8 +58,9 @@ class BinanceHandler(IHandler):
                 break
             all_data.extend(data)
             since = data[-1][0] + 1  # Update 'since' to get the next batch of data
-
-        self.__save_binance_data_csv(all_data, file_name=self.__get_file_name())
+        print(all_data)
+        CsvHelper.save_binance_data_csv(all_data, file_name=filename)
+        return all_data
 
     def __get_binance_data(self, symbol, timeframe='1d', since=None):
         """

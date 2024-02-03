@@ -6,7 +6,7 @@
 #
 #
 from src.base.enums import HandlerType
-from src.modules.dc.cdata import BinanceHandler
+from src.modules.dc.cdata.handlers import BinanceHandler
 from src.modules.dc.cnews.handlers.NewsHandler import NewsHandler
 
 

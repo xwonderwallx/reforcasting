@@ -8,7 +8,7 @@
 import logging
 import matplotlib
 
-from src.modules.dc.cdata import BinanceHandler
+from src.modules.dc.cdata.handlers import BinanceHandler
 
 
 def main():
@@ -17,7 +17,7 @@ def main():
     logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
                         level=logging.DEBUG)
 
-    file_path = 'btc_data.csv'
+    file_path = 'includes/exchange_data/btc_data.csv'
 
     params = {
         'symbol': 'BTCUSDT',
