@@ -3,6 +3,7 @@ from keras.src.layers import Bidirectional, Dropout, GRU, Dense
 from keras.src.models.cloning import Sequential
 from keras.src.optimizers.adam import Adam
 
+from src.base.enums.MLModule import MLModule
 from src.base.enums.ModelLayer import ModelLayer
 from src.base.enums.ModelType import ModelType
 from src.base.enums.OptimizerType import OptimizerType
@@ -11,7 +12,7 @@ from src.base.services.Config import Config
 
 class MLHelper:
 
-    def __init__(self, ml_module_name):
+    def __init__(self, ml_module_name: MLModule):
         self.__ml_module_name = ml_module_name
         self.__settings = Config.get()['ml_model'][f'{ml_module_name}']
         self.__callbacks_settings = self.__settings['hyper_parameters']['callbacks']
@@ -63,6 +64,8 @@ class MLHelper:
             self.__add_layer(level='fourth', model=model)
         if 'fifth' in layer_attr:
             self.__add_layer(level='fifth', model=model)
+
+        return model
 
     def __define_adam_optimizer(self):
         learning_rate = self.__callbacks_settings['compiling']['compiling']['learning_rate']
