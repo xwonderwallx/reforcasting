@@ -1,32 +1,36 @@
 import pandas as pd
-from keras.models import Sequential
-from keras.layers import Bidirectional, GRU, Dropout, Dense
-from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
 from src.base.enums.MLModule import MLModule
 from src.base.helpers.MLHelper import MLHelper
 from src.base.services.Config import Config
-from src.modules.ml.cdata.classes.CPreparer import CPreparer  # Adjust the import path as necessary
+from src.base.services.Timer import Timer
+from src.modules.ml.cdata.classes.CPreparer import CPreparer
 
 
 class CTrainer:
+    # TODO set paths to CSV files
     def __init__(self, dataset_paths):
         self.__sets = None
         self.__settings = Config.get()['ml_model']['cdata']
         self.__dataset_paths = dataset_paths  # List of paths to CSV files
         self.__ml_module = MLModule.CData
         self.__ml_helper = MLHelper(ml_module_name=self.__ml_module)
+        self.__timer = Timer()
 
     def train_multiple_datasets(self):
-        for path in self.dataset_paths:
-            print(f"Training on dataset: {path}")
+        self.__timer.start(label='train_multiple_datasets full time spent')
+        for path in self.__dataset_paths:
+            inner_timer = Timer().start(f"Training on dataset: {path}")
             df = pd.read_csv(path)
             preparer = CPreparer(df)
             prepared_data = preparer.prepare_data()
             sets = prepared_data['sets']
             self.__sets = sets
             self.train_one_dataset()  # Train on the current dataset
+            inner_timer.stop()
+            print(inner_timer.info())
+        self.__timer.stop()
+        print(self.__timer.info())
 
     def train_one_dataset(self):
         model = self.__define_model()
@@ -36,19 +40,20 @@ class CTrainer:
         # evaluator = CEvaluator(real_data, predicted_data)
         # evaluator.evaluate()
         # evaluator.get_info()
+        return history
 
     def __define_model(self):
         features_columns = self.__settings['datasets_params']['features']
         look_back = self.__settings['datasets_params']['look_back']
         # n_features = len(features_columns)
-        model = self.__ml_helper.define_model(params=[features_columns, look_back])
-        self.__ml_helper.define_model_layers(model=model)
+        model = self.__ml_helper.configured_model(params=[features_columns, look_back])
+        self.__ml_helper.__define_model_layers(model=model)
         return model
 
     def __compile_model(self, model):
         optimizer = self.__ml_helper.define_config_optimizer()
-        loss = self.__settings['']
-        model.compile(optimizer=optimizer, loss='mean_squared_error')
+        loss = self.__settings['hyper_parameters']['compiling']['loss']
+        model.compile(optimizer=optimizer, loss=loss)
         return model
 
     def __define_callbacks(self):
