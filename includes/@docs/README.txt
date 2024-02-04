@@ -1,6 +1,12 @@
+The config.json have this structure:
+{
+    "configuration"
+}
+
+
 {
   "configuration": {
-    "paths": {
+    "paths":  {
       "exchange_data": "./includes/exchange_data/",
       "models": "./includes/models/"
     },
@@ -42,7 +48,6 @@
   "ml_model": {
     "cdata": {
       "hyper_parameters": {
-        "model_type": "Sequential",
         "features": [
           "Close",
           "Volume",
@@ -54,70 +59,7 @@
           "Lower_BB"
         ],
         "epochs": 150,
-        "batch_size": 16,
-        "look_back": 60,
-        "callbacks": {
-          "early_stopping": {
-            "monitor": "val_loss",
-            "patience": 20,
-            "restore_best_weights": true
-          },
-          "model_checkpoint": {
-            "save_file_path": "cd_model.keras",
-            "save_best_only": true,
-            "monitor": "val_loss",
-            "mode": "min"
-          },
-          "reduce_lr": {
-            "monitor": "val_loss",
-            "factor": 0.2,
-            "patience": 5,
-            "min_lr": 0.0001
-          }
-        },
-        "compiling": {
-          "compiling": {
-            "name": "Adam",
-            "learning_rate": 0.0005
-          },
-          "loss": "binary_crossentropy"
-        },
-        "model_layers": {
-          "first": {
-            "name": "bidirectional",
-            "bidirectional": {
-              "key_name": "gru",
-              "gru": {
-                "units": 128,
-                "return_sequences": true
-              }
-            }
-          },
-          "second": {
-            "name": "dropout",
-            "dropout": 0.4
-          },
-          "third": {
-            "name": "bidirectional",
-            "bidirectional": {
-              "key_name": "gru",
-              "gru": {
-                "units": 64,
-                "return_sequences": false
-              }
-            }
-          },
-          "fourth": {
-             "name": "dropout",
-            "dropout": 0.4
-          },
-          "fifth": {
-            "name": "dense",
-            "dense": {
-              "units": 1
-            }
-          }
-        }
+        "batch_size": 16
       },
       "datasets_params": {
         "features": [
