@@ -1,5 +1,5 @@
 
-class IPreparer(object):
+class BasePreparer(object):
     def __init__(self):
         pass
 

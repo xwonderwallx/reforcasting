@@ -1,0 +1,9 @@
+code_negotiations:
+
+1. Class name should start from the Uppercase letter
+in CamelCase style.
+
+2. Name of methods inside class:
+def method()        public method
+def _method()       protected method
+def __method()      private method

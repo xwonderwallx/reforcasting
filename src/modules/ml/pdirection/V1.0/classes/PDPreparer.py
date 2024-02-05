@@ -7,10 +7,10 @@
 #
 import numpy as np
 
-from src.base.classes.IPreparer import IPreparer
+from src.base.classes.BasePreparer import BasePreparer
 
 
-class PDPreparer(IPreparer):
+class PDPreparer(BasePreparer):
     def __init__(self, model, sets):
         super().__init__()
         self.__model = model

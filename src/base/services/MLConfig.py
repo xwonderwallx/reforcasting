@@ -4,21 +4,26 @@ from keras.src.models.cloning import Sequential
 from keras.src.optimizers.adam import Adam
 
 from src.base.enums.CallbackType import CallbackType
-from src.base.enums.MLModule import MLModule
+from src.base.enums.InputShape import InputShape
+from src.base.enums.Modules import Modules
 from src.base.enums.ModelLayer import ModelLayer
 from src.base.enums.ModelType import ModelType
 from src.base.enums.OptimizerType import OptimizerType
 from src.base.services.Config import Config
 
 
-class MLHelper:
+class MLConfig:
 
-    def __init__(self, ml_module_name: MLModule):
+    def __init__(self, ml_module_name: Modules):
         self.__ml_module_name = ml_module_name
         self.__settings = Config.get()['ml_model'][f'{ml_module_name}']
         self.__callbacks_settings = self.__settings['hyper_parameters']['callbacks']
         self.__layers = self.__settings['hyper_parameters']['model_layers']
         self.__model_type = self.__settings['hyper_parameters']['model_type']
+
+    @property
+    def current_module_settings(self):
+        return Config.get()['ml_model'][self.__ml_module_name]
 
     @property
     def look_back(self):
@@ -49,6 +54,10 @@ class MLHelper:
         return self.__callbacks_settings.keys()
 
     @property
+    def compiling_loss(self):
+        return self.hyper_parameters['compiling']['loss']
+
+    @property
     def hyper_parameters(self):
         return self.__settings['hyper_parameters']
 
@@ -58,41 +67,43 @@ class MLHelper:
         model = self.__define_model_layers(model)
         return model
 
-    def __get_configured_callbacks(self):
-        configured_callbacks = []
-        for callback in self.__callbacks_settings.keys():
-            if callback == CallbackType.EarlyStopping:
-                configured_callbacks.append({CallbackType.EarlyStopping: self.define_early_stopping()})
-            if callback == CallbackType.ModelCheckpoint:
-                configured_callbacks.append({CallbackType.ModelCheckpoint: self.define_model_checkpoint()})
-            if callback == CallbackType.ReduceLR:
-                configured_callbacks.append({CallbackType.ReduceLR: self.define_reduce_lr()})
-        return configured_callbacks
+    @property
+    def configured_optimizer(self):
+        optimizer = self.__callbacks_settings['compiling']['optimizer']
+        if optimizer['name'] == OptimizerType.Adam:
+            return self.__define_adam_optimizer()
+        return None
 
-    def define_early_stopping(self):
+    def __define_early_stopping(self):
         monitor = self.__callbacks_settings['early_stopping']['monitor']
         patience = self.__callbacks_settings['early_stopping']['patience']
         restore_best_weights = self.__callbacks_settings['early_stopping']['restore_best_weights']
         return EarlyStopping(monitor=monitor, patience=patience, restore_best_weights=restore_best_weights)
 
-    def define_model_checkpoint(self):
+    def __define_model_checkpoint(self):
         filepath = self.__settings['model_checkpoint']['save_file_path']
         save_best_weights = self.__settings['model_checkpoint']['save_best_only']
         monitor = self.__callbacks_settings['model_checkpoint']['monitor']
         mode = self.__callbacks_settings['model_checkpoint']['mode']
         return ModelCheckpoint(filepath=filepath, save_best_only=save_best_weights, monitor=monitor, mode=mode)
 
-    def define_reduce_lr(self):
+    def __define_reduce_lr(self):
         monitor = self.__callbacks_settings['reduce_lr']['monitor']
         factor = self.__callbacks_settings['reduce_lr']['factor']
         patience = self.__callbacks_settings['reduce_lr']['patience']
         min_lr = self.__callbacks_settings['reduce_lr']['min_lr']
         return ReduceLROnPlateau(monitor=monitor, factor=factor, patience=patience, min_lr=min_lr)
 
-    def define_config_optimizer(self):
-        optimizer = self.__callbacks_settings['compiling']['optimizer']
-        if optimizer['name'] == OptimizerType.Adam:
-            return self.__define_adam_optimizer()
+    def __get_configured_callbacks(self):
+        configured_callbacks = []
+        for callback in self.callbacks_types:
+            if callback == CallbackType.EarlyStopping:
+                configured_callbacks.append({CallbackType.EarlyStopping: self.__define_early_stopping()})
+            if callback == CallbackType.ModelCheckpoint:
+                configured_callbacks.append({CallbackType.ModelCheckpoint: self.__define_model_checkpoint()})
+            if callback == CallbackType.ReduceLR:
+                configured_callbacks.append({CallbackType.ReduceLR: self.__define_reduce_lr()})
+        return configured_callbacks
 
     def __define_model(self, params=None):
         if self.__model_type == ModelType.Sequential:
@@ -128,8 +139,10 @@ class MLHelper:
             return self.__define_gru(settings, input_shape)
 
     def __define_gru(self, settings, input_shape=None):
-        units = settings['gru']['units']
-        return_sequences = settings['gru']['return_sequences']
+        gru = settings['gru']
+        units = gru['units']
+        return_sequences = gru['return_sequences']
+        input_shape = self.__get_input_shape(settings=settings)
         if input_shape is not None:
             return GRU(units=units, return_sequences=return_sequences, input_shape=input_shape)
         else:
@@ -146,3 +159,25 @@ class MLHelper:
     def __add_layer(self, layer, model, params=None):
         model.add(self.__define_layer(level=layer, params=params))
         return model
+
+    def __get_input_shape_settings(self, settings):
+        if 'input_shape' in settings.keys():
+            return settings['input_shape']
+        return None
+
+    def __get_input_shape(self, settings):
+        input_shape_settings = self.__get_input_shape_settings(settings=settings)
+        if input_shape_settings is not None:
+            return self.__define_input_shape(input_shape_settings=input_shape_settings)
+        return None
+
+    def __define_input_shape(self, input_shape_settings):
+        input_shape = []
+        for setting in input_shape_settings:
+            if setting == InputShape.LookBack:
+                input_shape.append(self.look_back)
+            if setting == InputShape.NFeatures:
+                input_shape.append(len(self.features))
+        if len(input_shape) != 0:
+            return input_shape
+        return None

@@ -6,23 +6,20 @@
 #
 #
 
-from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import GRU, Dropout, Dense
 from keras.models import Sequential
-from keras.optimizers import Adam
-from keras.src.callbacks import ReduceLROnPlateau
 from keras.src.layers import Bidirectional
 
-from src.base.helpers.MLHelper import MLHelper
+from src.base.enums.Modules import Modules
+from src.base.services.MLConfig import MLConfig
 from src.base.services.Config import Config
 
 
 class CTrainer:
     def __init__(self, sets):
-        self.__settings = Config.get()['ml_model']['cdata']
+        self.__ml_helper = MLConfig(Modules.CData)
+        self.__settings = self.__ml_helper.current_module_settings
         self.__sets = sets
-        self.__module_name = 'cdata'
-        self.__ml_helper = MLHelper(self.__module_name)
 
     def train(self):
         # df = pd.DataFrame(self.__prepared_data)
@@ -56,16 +53,16 @@ class CTrainer:
         return model
 
     def __compile_model(self, model):
-        adam = self.__ml_helper.define_config_optimizer()
+        adam = self.__ml_helper.configured_optimizer()
         loss = self.__settings['hyper_parameters']['compiling']['loss']
         model.compile(optimizer=adam, loss=loss)
         return model
 
     def __define_callbacks(self):
         return {
-            'early_stopping': self.__ml_helper.define_early_stopping(),
-            'model_checkpoint': self.__ml_helper.define_model_checkpoint(),
-            'reduce_lr': self.__ml_helper.define_reduce_lr()
+            'early_stopping': self.__ml_helper.__define_early_stopping(),
+            'model_checkpoint': self.__ml_helper.__define_model_checkpoint(),
+            'reduce_lr': self.__ml_helper.__define_reduce_lr()
         }
 
     def __fit_model(self, model):

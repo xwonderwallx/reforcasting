@@ -1,0 +1,63 @@
+
+Configuration file is created in the .json format.
+Please use src.base.services.Config.get() to get the instance of the configuration file
+To extend settings use this structure:
+
+## Modules :
+
+"configuration" = {
+    "paths": {
+        ...
+        add_your_own_path_here
+    }
+}
+
+
+"ml_model" = {                                                      configuration for machine learning model.
+    "change_to_module_name_here": {                                 You can use src.base.services.MLConfig to manipulate through this module
+        "hyper_parameters": {
+        "model_type": change_to_model_type_here,                    model type is i.e. Sequential
+        "features":[]                                               some special features to train model
+        "epochs": change_to_number_here                             amount of epochs to train model
+        "batch_size": change_to_number_here,                        size of the batch while training
+        "look_back": change_to_number_here,                         the amount of epochs to stop earlier to exclude over train of the model
+        "callbacks": {                                              callbacks to fit the model
+          "callback_name": {                                        stop earlier to exclude over train of the model
+            change_to_callback_params_here
+          }
+        },
+        "compiling": {
+          "optimizer": {
+            "name": change_to_optimizer_name_here,                  name of the optimizer i.e. "Adam"
+            "learning_rate": change_to_number_here
+          },
+          "loss": change_to_loss_type_here                          "binary_crossentropy"
+        },
+        "model_layers": {
+          "number_str": {                                           Change to spelling type number i.e. "first"
+            "name": name_of_the_layer,
+            "name_of_the_layer": {
+              "key_name": key_name,
+              "key_name": {
+                    special_layer_params
+                ]
+              }
+            }
+          },
+          ...                                                       there can be as many layers as you need
+        }
+      }
+    }
+}
+
+
+"datasets": {                                                       configuration for datasets
+    "change_to_module_name_here": {
+      "test_set": {                                                 test_set['size'] + train_set['size'] == 1
+        "size": percent_value_of_the_test_set_div_to_100
+      },
+      "train_set": {
+        "size": percent_value_of_the_train_set_div_to_100
+      }
+    }
+  }

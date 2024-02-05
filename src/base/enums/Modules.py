@@ -8,6 +8,6 @@
 from enum import Enum
 
 
-class MLModule(Enum):
+class Modules(Enum):
     CData = 'cdata',
     PDirection = 'pdirection'
