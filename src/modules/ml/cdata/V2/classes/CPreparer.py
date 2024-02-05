@@ -7,13 +7,14 @@
 #
 import numpy as np
 import pandas as pd
-from src.base.services.Config import Config
-from src.modules.ml.cdata.classes.CNormalizer import CNormalizer
+from src.base.services.Settings import Settings
+from src.modules.ml.cdata.V1.classes import CNormalizer
 
 
 class CPreparer:
+
     def __init__(self, df):
-        self.__settings = Config.get()
+        self.__settings = Settings.get()
         self.__df = df
 
     def prepare_data(self):

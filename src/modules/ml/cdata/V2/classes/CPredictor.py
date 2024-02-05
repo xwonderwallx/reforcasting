@@ -6,14 +6,14 @@
 #
 #
 
-from src.base.services.Config import Config
-from src.modules.ml.cdata.classes.CNormalizer import CNormalizer
+from src.base.services.Settings import Settings
+from src.modules.ml.cdata.V1.classes import CNormalizer
 
 
 class CPredictor:
     def __init__(self, trained_model, sets, df):
         self.__trained_model = trained_model
-        self.__settings = Config.get()
+        self.__settings = Settings.get()
         self.__sets = sets
         self.__df = df
         self.__normalizer = CNormalizer(df)

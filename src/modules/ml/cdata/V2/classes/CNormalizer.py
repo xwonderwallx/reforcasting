@@ -8,14 +8,14 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-from src.base.services.Config import Config
+from src.base.services.Settings import Settings
 
 
 class CNormalizer:
     def __init__(self, data_frame):
         self.__df = data_frame
         self.__df.dropna(inplace=True)
-        self.__settings = Config.get()
+        self.__settings = Settings.get()
         self.__features_columns = self.__settings['ml_model']['cdata']['datasets_params']['features']
         self.__scaler = None
 

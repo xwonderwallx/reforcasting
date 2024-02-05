@@ -1,18 +1,25 @@
-import json
-import string
+from src.base.services.Settings import Settings
 
 
 class Config:
-    SETTINGS_PATH = './includes/config.json'
+    def __init__(self):
+        self.__config = Settings.get()['configuration']
+        self.__paths = self.__config['paths']
+        self.__exchange_data = self.__config['exchange_data']
+        self.__google_keys = self.__config['google']['keys']
 
-    @staticmethod
-    def get():
-        with open(Config.SETTINGS_PATH, 'r') as settings_json:
-            return json.load(settings_json)
+    @property
+    def exchange_data_path(self):
+        return self.__paths['exchange_data']
 
-    @staticmethod
-    def set(key: string, value):
-        settings = Config.get()
-        settings[key] = value
-        with open(Config.SETTINGS_PATH, 'w') as settings_json:
-            json.dump(settings, settings_json, indent=4)
+    @property
+    def models_path(self):
+        return self.__paths['models']
+
+    @property
+    def gs_api_key(self):
+        return self.__google_keys['google_search_api_key']
+
+    @property
+    def gs_engine_key(self):
+        return self.__google_keys['google_search_engine_id']

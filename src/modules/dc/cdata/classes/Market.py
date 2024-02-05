@@ -1,5 +1,8 @@
+from src.base.enums.SourceMarket import SourceMarket
 from src.base.helpers.CsvHelper import CsvHelper
+from src.base.helpers.ExchangeDataHelper import ExchangeDataHelper
 from src.base.services.Config import Config
+from src.base.services.Settings import Settings
 from src.base.services.Timer import Timer
 from src.modules.dc.cdata.handlers.BinanceHandler import BinanceHandler
 from src.modules.dc.cdata.helpers.MarketHelper import MarketHelper
@@ -10,9 +13,10 @@ class Market:
     def __init__(self, handler: BinanceHandler):
         self.__handler = handler
         self.__timer = Timer()
-        self.__settings = Config.get()
-        self.__trading_pairs = self.__settings['configuration']['exchange_data']['trading_pairs']['binance']
+        self.__settings = Settings.get()
+        self.__trading_pairs = ExchangeDataHelper.source_market_trading_pairs(source_market=SourceMarket.Binance)
         self.__binance_data = self.binance_data
+        self.__config = Config()
 
     # TODO Finish the property . It is a skeleton right now | need to add a timeframe period
     # The full data from Binance of trading pairs from configuration
@@ -44,7 +48,7 @@ class Market:
         self.__timer.start(label='src.moduler.dc.cdata.classes.Market.save_binance_data_to_csv_file()')
 
         if self.__binance_data is not None:
-            filepath = self.__settings['configuration']['paths']['exchange_data']
+            filepath = self.__config.exchange_data_path['exchange_data']
             print(f"{self.__binance_data} is not None")
             CsvHelper.save_binance_data_csv(data=self.__binance_data, file_name=f'{filepath}full_market_data.csv')
         else:
@@ -60,7 +64,7 @@ class Market:
         self.__timer.start(label='src.moduler.dc.cdata.classes.Market.__get_binance_handler_params_with_each_pair()')
 
         for pair in self.__trading_pairs:
-            filepath = self.__settings['configuration']['paths']['exchange_data']
+            filepath = self.__config.exchange_data_path
             inner_timer = Timer('pair')
             inner_timer.start()
             symbols_pair = {

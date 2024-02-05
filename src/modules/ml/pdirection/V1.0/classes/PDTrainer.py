@@ -13,12 +13,12 @@ from keras.optimizers import Adam
 from keras.src.callbacks import ReduceLROnPlateau, ModelCheckpoint
 from keras.src.layers import Bidirectional
 
-from src.base.services.Config import Config
+from src.base.services.Settings import Settings
 
 
 class PDTrainer:
     def __init__(self, sets):
-        self.__settings = Config.get()
+        self.__settings = Settings.get()
         self.__sets = sets
         self.__hyper_params = self.__settings['ml_model']['pdirection']['hyper_parameters']
         self.__layers = self.__hyper_params['model_layers']

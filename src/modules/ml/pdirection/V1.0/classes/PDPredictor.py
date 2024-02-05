@@ -7,14 +7,13 @@
 #
 import numpy as np
 
-from src.base.services.Config import Config
-from src.modules.ml.cdata.classes.CNormalizer import CNormalizer
+from src.base.services.Settings import Settings
 
 
 class PDPredictor:
     def __init__(self, trained_model, sets):
         self.__trained_model = trained_model
-        self.__settings = Config.get()
+        self.__settings = Settings.get()
         self.__sets = sets
 
     def predict(self):

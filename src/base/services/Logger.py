@@ -11,7 +11,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from src.base.entities.Singleton import Singleton
 from src.base.helpers.LogHelper import LogHelper
-from src.base.services.Config import Config
+from src.base.services.Settings import Settings
 
 
 class Logger(Singleton):
@@ -35,7 +35,7 @@ class Logger(Singleton):
         #     self.debug_label = debug_label if debug_label != '' else LogHelper.DEBUG_LABEL
         #     self.subject = LogHelper.LOG_LABEL if log_label != '' else LogHelper.LOG_LABEL
 
-        self.__settings = Config.get()['logger']
+        self.__settings = Settings.get()['logger']
         self.__client_url = self.__settings['client_url']
         self.__log_label = self.__settings['log_label']
         self.__logs = []

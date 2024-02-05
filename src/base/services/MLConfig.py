@@ -9,21 +9,21 @@ from src.base.enums.Modules import Modules
 from src.base.enums.ModelLayer import ModelLayer
 from src.base.enums.ModelType import ModelType
 from src.base.enums.OptimizerType import OptimizerType
-from src.base.services.Config import Config
+from src.base.services.Settings import Settings
 
 
 class MLConfig:
 
     def __init__(self, ml_module_name: Modules):
         self.__ml_module_name = ml_module_name
-        self.__settings = Config.get()['ml_model'][f'{ml_module_name}']
+        self.__settings = Settings.get()['ml_model'][f'{ml_module_name}']
         self.__callbacks_settings = self.__settings['hyper_parameters']['callbacks']
         self.__layers = self.__settings['hyper_parameters']['model_layers']
         self.__model_type = self.__settings['hyper_parameters']['model_type']
 
     @property
     def current_module_settings(self):
-        return Config.get()['ml_model'][self.__ml_module_name]
+        return Settings.get()['ml_model'][self.__ml_module_name]
 
     @property
     def look_back(self):

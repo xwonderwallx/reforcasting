@@ -1,11 +1,12 @@
 from src.base.enums.SourceMarket import SourceMarket
 from src.base.services.Config import Config
+from src.base.services.Settings import Settings
 
 
 class ExchangeDataHelper:
     @staticmethod
     def source_market_trading_pairs(source_market: SourceMarket = SourceMarket.Binance):
-        return Config.get()['configuration']['exchange_data']['trading_pairs'][source_market]
+        return Config().exchange_data_path['trading_pairs'][source_market]
 
     @staticmethod
     def paths_to_trading_pairs_exchange_data(source_market: SourceMarket = SourceMarket.Binance):
@@ -18,4 +19,4 @@ class ExchangeDataHelper:
 
     @staticmethod
     def path_to_exchange_data_folder():
-        return Config.get()['configuration']['paths']['exchange_data']
+        return Settings.get()['configuration']['paths']['exchange_data']
