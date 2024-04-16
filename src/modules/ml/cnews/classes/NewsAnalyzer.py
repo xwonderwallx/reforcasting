@@ -3,7 +3,7 @@ import nltk
 from bs4 import BeautifulSoup
 from nltk import PorterStemmer, WordNetLemmatizer
 from nltk.corpus import stopwords
-from src.base.enums import MoodState
+from src.base.enums.news import MoodState
 from transformers import pipeline
 
 

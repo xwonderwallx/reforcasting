@@ -1,24 +1,40 @@
-# BinanceHandler.py
-#
-#
-# Binance date handler
-# Getting and saving Binance data from Binance API to local csv file as a local data storage
-# use handle() to process the data from Binance API
-#
-#
-
 import ccxt
 from src.base.handlers.IHandler import IHandler
 from src.base.helpers.CsvHelper import CsvHelper
 
 
 class BinanceHandler(IHandler):
+    """
+    A class for handling the retrieval and storage of market data from the Binance API.
 
-    @property
-    def exchange(self):
-        return self.__exchange
+    This handler connects to the Binance API, fetches market data for a given cryptocurrency pair,
+    and timeframe, then saves the data to a local CSV file. It is designed to be used with a
+    dictionary of parameters that specify the details of the data to be fetched and stored.
+
+    Attributes:
+        __params (dict): A dictionary containing parameters for data handling.
+        __exchange (ccxt.binance): An instance of the ccxt Binance exchange class,
+                                   used to interact with the Binance API.
+
+    Methods:
+        __init__(self, params=None): Initializes the handler with given parameters.
+        exchange (property): Returns the ccxt Binance exchange instance.
+        handle(self): The main method to be called to fetch and save data.
+        __get_and_save_binance_data(self): Retrieves data from Binance and saves it to a CSV file.
+        __get_binance_data(self, symbol, timeframe='1d', since=None): Fetches market data from Binance API.
+        __get_currency_symbol(self): Retrieves the currency symbol from the parameters.
+        __get_timeframe_alias(self): Retrieves the timeframe alias from the parameters.
+        __get_file_name(self): Retrieves the file name from the parameters for saving the data.
+    """
 
     def __init__(self, params=None):
+        """
+        Initializes the BinanceHandler with the provided parameters.
+
+        Args:
+            params (dict, optional): Parameters for handling data which can include 'data',
+                                     'symbol', 'timeframe', 'limit', and 'days'. Defaults to None.
+        """
         """
         expects an array here:
         Args:
@@ -33,23 +49,25 @@ class BinanceHandler(IHandler):
         self.__params = params
         self.__exchange = ccxt.binance()
 
-    # from abstract DataHandler.php
+    @property
+    def exchange(self):
+        """Returns the ccxt Binance exchange instance."""
+        return self.__exchange
+
     def handle(self):
+        """
+        The main method to be called to fetch and save data.
+
+        Returns:
+            list: The market data retrieved from the Binance API and saved to CSV.
+        """
         return self.__get_and_save_binance_data()
 
     def __get_and_save_binance_data(self):
-        # # TODO: markets for rate
-        # # TODO: set format of date : array({day: d, rate: r}, {}, {}, {}, {})
         symbol = self.__get_currency_symbol()
-        print(symbol)
         timeframe = self.__get_timeframe_alias()
-        # url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
-        # path_to_file = f'../binance_data/{symbol}.csv'
-        print(timeframe)
         filename = self.__get_file_name()
-
         since = self.__exchange.parse8601('2010-07-17T00:00:00Z')
-        print(since)
 
         all_data = []
         while True:

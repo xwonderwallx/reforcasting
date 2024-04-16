@@ -4,44 +4,60 @@
 # Use add_log(log) to add logs in the final output
 # __del__() writes log to the list and sends it to email
 #
+# PLEASE USE get_instance() method to implement Singleton pattern
 #
-import pprint
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+
+import json
+import atexit
+import requests
+
+from src.base.entities.Log import Log
 from src.base.entities.Singleton import Singleton
-from src.base.helpers.LogHelper import LogHelper
-from src.base.services.Settings import Settings
+from src.base.services.Config import Config
 
 
 class Logger(Singleton):
 
-    @property
-    def logger(self):
-        return self.__logs
-
     def __init__(self):
-        # if not hasattr(self, 'initialized'):
-        #     self.initialized = True
-        #     self.text = []
-        #     if initial_text == '':
-        #         self.text.append(initial_text)
-        #
-        #     self.sender_email = sender_email if sender_email != '' else LogHelper.SENDER_EMAIL
-        #     self.recipient_email = recipient_email if recipient_email != '' else LogHelper.RECIPIENT_EMAIL
-        #     self.smtp_server = smtp_server if smtp_server != '' else LogHelper.SMTP_SERVER
-        #     self.password = password if password != '' else LogHelper.PASSWORD
-        #
-        #     self.debug_label = debug_label if debug_label != '' else LogHelper.DEBUG_LABEL
-        #     self.subject = LogHelper.LOG_LABEL if log_label != '' else LogHelper.LOG_LABEL
+        if not hasattr(self, '_initialized'):
+            super().__init__()
+            self.__config = Config().log
+            self.__client_url = self.__config['client_url']
+            self.__log_label = self.__config['log_label']
+            self.__logs = []
+            self._initialized = True
+            atexit.register(self.cleanup)
 
-        self.__settings = Settings.get()['logger']
-        self.__client_url = self.__settings['client_url']
-        self.__log_label = self.__settings['log_label']
-        self.__logs = []
+    def __enter__(self):
+        return self
 
-    def add_log(self, log):
-        self.__logs.append(f"{self.__log_label} | {log}")
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.cleanup()
+
+    @staticmethod
+    def get_instance():
+        # Ensure Singleton pattern enforcement
+        if not hasattr(Logger, "_instance"):
+            Logger._instance = Logger()
+        return Logger._instance
+
+    def add_log(self, log: Log):
+        self.__logs.append(log)
+
+    def cleanup(self):
+        self.send_logs_to_client()
 
     def send_logs_to_client(self):
-        pass
+        logs_data = [log.to_dict() for log in self.__logs]
+        payload = {
+            self.__log_label: logs_data
+        }
+        headers = {'Content-Type': 'application/json'}
+
+        # Send the logs as a JSON payload to the client URL
+        try:
+            response = requests.post(self.__client_url, data=json.dumps(payload), headers=headers)
+            response.raise_for_status()  # Raises an exception for 4XX/5XX errors
+            print(f"Logs successfully sent to client: {response.text}")
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to send logs to client: {e}")

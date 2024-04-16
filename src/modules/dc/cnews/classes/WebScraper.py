@@ -3,18 +3,21 @@ from bs4 import BeautifulSoup
 import requests
 from googleapiclient.discovery import build
 
+from src.base.enums.main.Modules import Modules
 from src.base.services.Config import Config
+from src.base.services.DataCollectionConfig import DataCollectionConfig
 
 
 class WebScraper:
     def __init__(self, user_agent=''):
-        if user_agent == '':
-            self.__user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-        else:
-            self.__user_agent = user_agent
         self.__config = Config()
         self.__search_api_key = self.__config.gs_api_key
         self.__search_engine_id = self.__config.gs_engine_key
+        self.__config = DataCollectionConfig(Modules.CNews)
+        if user_agent == '':
+            self.__user_agent = self.__config.default_user_agent
+        else:
+            self.__user_agent = user_agent
 
     def search_and_scrape(self, query):
         search_links_results = self.__google_search(query)
@@ -35,10 +38,10 @@ class WebScraper:
             return None
 
     def __parse_html(self, html_content):
-        return BeautifulSoup(html_content, 'html.parser')
+        return BeautifulSoup(html_content, self.__config.html_parser_features)
 
     def __extract_data(self, soup):
-        paragraphs = soup.find_all('p')
+        paragraphs = soup.find_all(self.__config.tag_to_find)
         text = [p.get_text() for p in paragraphs]
         return text
 
@@ -50,7 +53,7 @@ class WebScraper:
 
     def __google_search(self, query):
         try:
-            service = build("customsearch", "v1", developerKey=self.__search_api_key)
+            service = build(self.__config.service_name, self.__config.version, developerKey=self.__search_api_key)
             res = service.cse().list(q=query, cx=self.__search_engine_id).execute()
             links = [result['link'] for result in res['items']]
             return links

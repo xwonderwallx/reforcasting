@@ -10,9 +10,8 @@ from keras.layers import GRU, Dropout, Dense
 from keras.models import Sequential
 from keras.src.layers import Bidirectional
 
-from src.base.enums.Modules import Modules
+from src.base.enums.main.Modules import Modules
 from src.base.services.MLConfig import MLConfig
-from src.base.services.Settings import Settings
 
 
 class CTrainer:

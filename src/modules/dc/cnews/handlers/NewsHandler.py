@@ -16,20 +16,17 @@ from collections import Counter
 
 class NewsHandler(IHandler):
     def __init__(self, currency, date):
-        nltk.download('wordnet')
-        nltk.download('stopwords')
-
+        # nltk.download('wordnet')
+        # nltk.download('stopwords')
         self.__currency = currency
         self.__date = date
 
     def handle(self):
         results = []
-
         for news in self.__get_financial_news():
             news_analyzer = NewsAnalyzer(news)
             analysis = news_analyzer.analyze()
             results.append(analysis)
-
         overall_sentiment = self.__aggregate_sentiment(results)
         return overall_sentiment
 

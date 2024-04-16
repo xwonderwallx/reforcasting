@@ -1,27 +1,65 @@
-from src.base.enums.SourceMarket import SourceMarket
+from src.base.enums.exchange.SourceMarket import SourceMarket
 from src.base.helpers.CsvHelper import CsvHelper
 from src.base.helpers.ExchangeDataHelper import ExchangeDataHelper
 from src.base.services.Config import Config
-from src.base.services.Settings import Settings
 from src.base.services.Timer import Timer
 from src.modules.dc.cdata.handlers.BinanceHandler import BinanceHandler
 from src.modules.dc.cdata.helpers.MarketHelper import MarketHelper
 
 
 class Market:
+    """
+    A class responsible for handling market data operations for Binance trading pairs.
+
+    This class provides functionalities to collect data from the Binance API, organize it,
+    and save it to CSV files. It uses a specified handler to interface with the Binance API
+    and utilizes a timer to track operation durations.
+
+    Attributes:
+        __handler (BinanceHandler): An instance of BinanceHandler to interact with the Binance API.
+        __timer (Timer): An instance of Timer to measure operation durations.
+        __config (Config): An instance of Config to access configuration settings.
+        __trading_pairs (list): A list of trading pairs to collect data for, as specified in the configuration.
+        __binance_data (list): A list of collected Binance data for the specified trading pairs.
+
+    Properties:
+        binance_data: Retrieves all collected data from the Binance API for different currencies.
+
+    Methods:
+        __init__(self, handler: BinanceHandler): Initializes the Market instance.
+        save_binance_data_to_csv_file(): Saves the collected Binance data to a CSV file.
+        __get_binance_handler_params_for_each_trading_pair(): Generates handler parameters for each trading pair.
+
+    Raises:
+        Exception: If any issue occurs during the initialization process.
+    """
 
     def __init__(self, handler: BinanceHandler):
+        """
+        Initializes the Market instance with a BinanceHandler and sets up necessary attributes.
+
+        Parameters:
+            handler (BinanceHandler): A handler to interact with the Binance API.
+        """
         self.__handler = handler
         self.__timer = Timer()
-        self.__settings = Settings.get()
+        self.__config = Config()
         self.__trading_pairs = ExchangeDataHelper.source_market_trading_pairs(source_market=SourceMarket.Binance)
         self.__binance_data = self.binance_data
-        self.__config = Config()
 
     # TODO Finish the property . It is a skeleton right now | need to add a timeframe period
     # The full data from Binance of trading pairs from configuration
     @property
     def binance_data(self):
+        """
+        Retrieves all collected data from the Binance API for different currencies.
+
+        This property orchestrates the collection of market data for each trading pair and returns
+        a list containing the data for all specified pairs.
+
+        Returns:
+            list: A list of collected market data from Binance.
+        """
         binance_handler_params = self.__get_binance_handler_params_for_each_trading_pair()
         all_collected_cdata = []
 
@@ -44,6 +82,13 @@ class Market:
         return all_collected_cdata
 
     def save_binance_data_to_csv_file(self):
+        """
+        Saves the collected Binance data to a CSV file specified in the configuration.
+
+        This method checks if there is any collected data to save. If data is present,
+        it is saved to a CSV file in the configured path. Otherwise, an informative message
+        is printed.
+        """
         self.__timer.refresh_timer()
         self.__timer.start(label='src.moduler.dc.cdata.classes.Market.save_binance_data_to_csv_file()')
 
@@ -58,6 +103,15 @@ class Market:
         print(self.__timer.info())
 
     def __get_binance_handler_params_for_each_trading_pair(self):
+        """
+        Generates handler parameters for each trading pair as specified in the configuration.
+
+        This method prepares the parameters required by the BinanceHandler to collect market data
+        for each trading pair. It includes symbol, timeframe, and file name for saving data.
+
+        Returns:
+            list: A list of dictionaries containing handler parameters for each trading pair.
+        """
         symbols_pairs = []
 
         self.__timer.refresh_timer()
